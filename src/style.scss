@@ -1,0 +1,317 @@
+@use "./normalize.scss" as *;
+
+$fontFamily: alipuhui, sans-serif;
+// $fontFamily: sans-serif;
+
+html,
+.wrapper,
+body,
+body > div:not([class], [id]) {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+}
+
+html,
+body {
+    overflow: hidden;
+}
+
+.wrapper {
+    background-color: #fff;
+}
+
+.question {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-flow: row wrap;
+    width: 100%;
+    flex: 0 0 auto;
+}
+
+.questionContent {
+    color: #212121;
+    font-family: $fontFamily;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 30px;
+    letter-spacing: 0.2px;
+}
+
+.questionDes {
+    color: #757575;
+    font-family: $fontFamily;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 30px;
+    letter-spacing: 0.2px;
+}
+
+.main {
+    width: 100%;
+}
+
+.options_row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    flex-flow: row nowrap;
+    margin: 45px 0;
+}
+
+.options_blank {
+    background-color: #f9fbfb;
+    height: 4px;
+    width: 100%;
+}
+
+.options_items {
+    width: calc(100% - 92px);
+    margin-left: 92px;
+}
+
+.options_items_mobile {
+    width: calc(100% - 92px);
+    margin-left: 92px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    flex-flow: row nowrap;
+}
+
+.options_item_mobile {
+    flex: 0 0 auto;
+    width: 147px;
+    margin-right: 20px;
+}
+
+/**** ruler部分 start ********/
+.ruler_wrap {
+    position: relative;
+    height: 200px;
+    &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1px;
+        height: 100%;
+        background-color: #bdbdbd;
+    }
+}
+
+@mixin Scale {
+    left: 0px;
+    position: absolute;
+    &::after {
+        content: "";
+        left: 0;
+        top: -0.5px;
+        height: 1px;
+        width: 100%;
+        background-color: #bdbdbd;
+        border-radius: 1px;
+        position: absolute;
+    }
+}
+
+.scaleItem_big {
+    position: absolute;
+    box-sizing: content-box;
+}
+
+.scaleItem_icon {
+    @include Scale();
+    width: 10px;
+}
+
+.scaleItemValue {
+    font-family: "Roboto";
+    font-style: normal;
+    top: 0;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.4px;
+    color: #757575;
+    transform: translateY(-50%);
+    padding-left: 15px;
+    position: absolute;
+}
+
+.scaleItem {
+    @include Scale();
+    width: 6px;
+}
+
+/**** ruler部分 end ********/
+
+.slider_wrap {
+    // background-color: red;
+}
+
+/************ bar部分 start *************/
+.bar_wrap {
+    position: absolute;
+    display: inline-block;
+    bottom: -16px;
+    cursor: pointer;
+    left: -4px;
+}
+
+.bar_btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-flow: row nowrap;
+    position: relative;
+    z-index: 2;
+}
+
+.bar_btnStart {
+    width: 21px;
+    height: 32px;
+    background-image: url("./Image/icon_nonebar1.png");
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 100% 100%;
+    background-color: transparent;
+    flex: 0 0 auto;
+}
+.bar_btnContent {
+    height: 32px;
+    background-image: url("./Image/icon_nonebar2.png");
+    background-repeat: repeat-x;
+    background-position: left center;
+    background-color: transparent;
+    display: inline-flex;
+    align-items: center;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    letter-spacing: 0.2px;
+    font-family: $fontFamily;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    * {
+        overflow: hidden;
+        display: inline;
+        text-overflow: ellipsis;
+    }
+}
+
+.bar_btnEnd {
+    width: 7px;
+    height: 32px;
+    background-image: url("./Image/icon_nonebar3.png");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 100% 100%;
+    background-color: transparent;
+    flex: 0 0 auto;
+}
+
+.bar_bg {
+    position: absolute;
+    width: 100%;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-flow: row nowrap;
+    left: -8px;
+    top: -6px;
+    width: calc(100% + 16px);
+    transition: all 0.1s linear;
+    z-index: 1;
+}
+
+.bar_bgStart {
+    flex: 0 0 auto;
+    width: 29px;
+    height: 100%;
+    background-image: url("./Image/icon_bar1.png");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 100% 100%;
+    background-color: transparent;
+}
+
+.bar_bgContent {
+    flex: 1 1 auto;
+    height: 100%;
+    background-image: url("./Image/icon_bar2.png");
+    background-repeat: repeat-x;
+    background-position: left center;
+    background-color: transparent;
+}
+
+.bar_bgEnd {
+    width: 15px;
+    height: 100%;
+    flex: 0 0 auto;
+    background-image: url("./Image/icon_bar3.png");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 100% 100%;
+    background-color: transparent;
+}
+
+/************ bar部分 end *************/
+
+/************ slider部分 start *************************/
+
+.sliderValue {
+    text-align: center;
+    letter-spacing: 0.25px;
+    color: #22a6b3;
+    font-family: "Roboto";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.slider_main {
+    width: 6px;
+    height: 201px;
+    background: #ebebeb;
+    border-radius: 10px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/************ slider部分 end *************************/
+
+/************* portal部分 start ************************************/
+.portal {
+    height: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.bar_titleContent {
+    letter-spacing: 0.5px;
+    font-family: $fontFamily;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 20px;
+    line-height: 18px;
+    color: #ffffff;
+}
+
+/************* portal部分 end ************************************/

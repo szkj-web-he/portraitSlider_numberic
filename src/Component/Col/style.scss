@@ -1,0 +1,40 @@
+@function width($span) {
+    @return calc((100% - 20px * 11) / 12 * $span + 20px * ($span - 1));
+}
+
+@mixin colSpan($span) {
+    width: width($span);
+    flex: 0 0 auto;
+    margin-left: 20px;
+    box-sizing: border-box;
+    &:first-of-type {
+        margin-left: 0;
+    }
+}
+
+@mixin colMargin($i, $d) {
+    &.col_#{$d}#{$i} {
+        margin-#{$d}: calc(width($i) + 20px);
+    }
+}
+/* <------------------------------------ **** SECTION1 MIXIN END **** ------------------------------------ */
+/* <--------------------------- * SECTION1 * --------------------------- */
+/* <--------------------------- * SECTION1 * --------------------------- */
+
+.col_wrap {
+    &0 {
+        display: none;
+    }
+    @for $i from 1 through 11 {
+        &#{$i} {
+            @include colSpan($i);
+            @for $j from 1 through 11 {
+                @include colMargin($j, "left");
+                @include colMargin($j, "right");
+            }
+        }
+    }
+    &12 {
+        width: 100%;
+    }
+}

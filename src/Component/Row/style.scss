@@ -1,0 +1,32 @@
+.row_wrap {
+    width: 100%;
+    display: flex;
+    box-sizing: border-box;
+}
+
+.row_align {
+    &top {
+        align-items: flex-start;
+    }
+    &bottom {
+        align-items: flex-end;
+    }
+    &middle {
+        align-items: center;
+    }
+    &stretch {
+        align-items: stretch;
+    }
+}
+
+.row_justify {
+    &left {
+        justify-content: flex-start;
+    }
+    &center {
+        justify-content: center;
+    }
+    &right {
+        justify-content: flex-end;
+    }
+}
