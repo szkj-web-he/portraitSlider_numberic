@@ -14,18 +14,14 @@ export const useRuler = (): undefined | [ScaleAttr, ScoreRange[]] => {
         const arr: ScoreRange[] = [];
         let min = -Infinity;
 
-        const start = scaleArr?.[0].bottom ?? 0;
-        const end = scaleArr?.[1].bottom ?? 0;
-        const s = (end - start) / 2;
-
         for (let i = 0; i < scaleArr.length; i++) {
             arr.push({
                 value: scaleArr[i].value,
                 min,
-                max: scaleArr[i + 1] ? scaleArr[i].bottom + s : Infinity,
-                x: scaleArr[i].bottom,
+                max: scaleArr[i + 1] ? scaleArr[i + 1].bottom : Infinity,
+                y: scaleArr[i].bottom,
             });
-            min = scaleArr[i].bottom + s;
+            min = scaleArr[i].bottom;
         }
         return [scaleData, arr];
     }, []);

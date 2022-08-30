@@ -60,7 +60,6 @@ body {
     align-items: flex-end;
     justify-content: flex-start;
     flex-flow: row nowrap;
-    margin: 45px 0;
 }
 
 .options_blank {
@@ -70,19 +69,20 @@ body {
 }
 
 .options_items {
-    width: calc(100% - 92px);
-    margin-left: 92px;
+    width: calc(100% - 82px);
+    margin-left: 82px;
 }
 
 .options_items_mobile {
-    width: calc(100% - 92px);
-    margin-left: 92px;
+    width: calc(100% - 82px);
+    margin-left: 82px;
     overflow-x: auto;
     overflow-y: hidden;
     display: flex;
     align-items: flex-end;
     justify-content: flex-start;
     flex-flow: row nowrap;
+    padding: 50px 0;
 }
 
 .options_item_mobile {
@@ -152,17 +152,15 @@ body {
 
 /**** ruler部分 end ********/
 
-.slider_wrap {
-    // background-color: red;
-}
-
 /************ bar部分 start *************/
 .bar_wrap {
     position: absolute;
     display: inline-block;
     bottom: -16px;
-    cursor: pointer;
+
     left: -4px;
+    transition: transform 0.1s linear;
+    z-index: 3;
 }
 
 .bar_btn {
@@ -172,6 +170,8 @@ body {
     flex-flow: row nowrap;
     position: relative;
     z-index: 2;
+    outline: none;
+    cursor: pointer;
 }
 
 .bar_btnStart {
@@ -205,10 +205,15 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.2s linear;
+    user-select: none;
     * {
         overflow: hidden;
         display: inline;
         text-overflow: ellipsis;
+    }
+    &.active {
+        color: #22a6b3;
     }
 }
 
@@ -274,7 +279,6 @@ body {
 /************ slider部分 start *************************/
 
 .sliderValue {
-    text-align: center;
     letter-spacing: 0.25px;
     color: #22a6b3;
     font-family: "Roboto";
@@ -282,6 +286,8 @@ body {
     font-weight: 400;
     font-size: 14px;
     line-height: 20px;
+    width: 6px;
+    position: relative;
 }
 
 .slider_main {
@@ -289,8 +295,26 @@ body {
     height: 201px;
     background: #ebebeb;
     border-radius: 10px;
-    margin: 0 auto;
     position: relative;
+}
+
+.sliderValue_content {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 10px;
+}
+
+.slider_progress {
+    width: 100%;
+    border-radius: 10px;
+    position: absolute;
+    z-index: 0;
+    bottom: 0;
+    height: 0;
+    left: 0;
+    background-color: #3cbbc7;
+    transition: height 0.1s linear;
 }
 
 /************ slider部分 end *************************/
@@ -309,9 +333,19 @@ body {
     font-style: normal;
     font-weight: 400;
     font-size: 12px;
-    line-height: 20px;
     line-height: 18px;
     color: #ffffff;
+    background: #000000;
+    opacity: 0.7;
+    border-radius: 4px;
+    padding: 4px 12px;
+    position: absolute;
+    white-space: nowrap;
+    transition: opacity 0.2s linear;
 }
 
 /************* portal部分 end ************************************/
+
+.slider_wrap {
+    padding-left: 10px;
+}

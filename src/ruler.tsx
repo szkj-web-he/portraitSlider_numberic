@@ -15,12 +15,18 @@ import { ScaleProps } from "./type";
 
 interface TempProps {
     scales: Array<ScaleProps>;
+
+    style?: React.CSSProperties;
 }
 /* <------------------------------------ **** INTERFACE END **** ------------------------------------ */
 /* <------------------------------------ **** FUNCTION COMPONENT START **** ------------------------------------ */
-const Temp: React.FC<TempProps> = ({ scales }) => {
+const Temp: React.FC<TempProps> = ({ scales, style }) => {
+    let { totalScore } = comms.config;
+    if (typeof totalScore !== "number" || totalScore > 100 || totalScore < 0) {
+        totalScore = 100;
+    }
     return (
-        <div className="ruler_wrap">
+        <div className="ruler_wrap" style={style}>
             {scales.map((item) => {
                 if (item.status === 2 || item.status === 1) {
                     return (
@@ -36,7 +42,7 @@ const Temp: React.FC<TempProps> = ({ scales }) => {
                                 <div
                                     className="scaleItemValue"
                                     ref={(el) => {
-                                        if (item.value !== comms.config.totalScore) {
+                                        if (item.value !== totalScore) {
                                             return;
                                         }
                                         if (!el) {

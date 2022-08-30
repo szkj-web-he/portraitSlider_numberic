@@ -1,7 +1,6 @@
 import { comms } from ".";
 import { isMobile } from "./isMobile";
 import { ScaleAttr, ScaleProps } from "./type";
-import { createPortal } from "react-dom";
 
 export const deepCloneData = <T>(data: T): T => {
     if (data == null) {
@@ -79,14 +78,14 @@ const normalScale = (margin: number, total: number, score: number): ScaleAttr =>
  * 设置刻度值
  */
 export const setScale = (): ScaleAttr | undefined => {
-    if (!comms.config.totalScore) {
-        return;
+    let { totalScore } = comms.config;
+    if (typeof totalScore !== "number" || totalScore > 100 || totalScore < 0) {
+        totalScore = 100;
     }
+
     const minMargin = 10;
 
     const total = 200;
-
-    const { totalScore } = comms.config;
 
     return normalScale(minMargin, total, totalScore);
 };
@@ -139,4 +138,33 @@ export const createPortalEl = (): Element => {
     div.setAttribute("class", "portal");
     document.body.append(div);
     return div;
+};
+
+export const getScrollValue = (): {
+    x: number;
+    y: number;
+} => {
+    let x = window.scrollX || window.pageXOffset;
+    let y = window.scrollY || window.pageYOffset;
+    const node = document.documentElement || document.body.parentNode;
+    if (!x) {
+        x = (typeof node.scrollLeft === "number" ? node : document.body).scrollLeft;
+    } else if (!y) {
+        y = (typeof node.scrollTop === "number" ? node : document.body).scrollTop;
+    }
+    return {
+        x,
+        y,
+    };
+};
+
+export const initScore = (): Record<string, number> => {
+    const arr = comms.config.options ?? [];
+
+    const data: Record<string, number> = {};
+    for (let i = 0; i < arr.length; i++) {
+        const item = deepCloneData(arr[i]);
+        data[item.code] = 0;
+    }
+    return { ...data };
 };

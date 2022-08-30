@@ -11,7 +11,7 @@ options: [
         # ],
         # [
         # "<s>T</s><div>恤</div>"
-        { "code": "1", "content": "T恤" },
+        { "code": "1", "content": "<div>Tasdfasdfasdfasdf</div><div>恤adsfasdfasdf</div>" },
         { "code": "2", "content": "短袖" },
         { "code": "3", "content": "长裤" },
         { "code": "4", "content": "运动鞋" },
@@ -48,6 +48,7 @@ options: [
         # ],
     ]
 
-totalScore: 100
+# 请设置0~100之间的数字
+totalScore: 10.5
 
 optionsInstruction: "请进行拖拽打分"

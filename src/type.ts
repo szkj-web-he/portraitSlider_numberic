@@ -6,10 +6,6 @@ export interface OptionProps {
 export interface PointProps {
     offsetX: number;
     offsetY: number;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
 }
 
 export interface DragPramsProps extends PointProps {
@@ -28,7 +24,7 @@ export interface ScoreRange {
     value: number;
     min: number;
     max: number;
-    x: number;
+    y: number;
 }
 
 export type ActiveOptionProps = { [key: string]: OptionProps } | undefined;
@@ -50,4 +46,30 @@ export interface ScaleAttr {
     margin: number;
     incrementVal: number;
     v: number;
+}
+
+export interface Fiber {
+    alternate: null;
+    child: Fiber;
+    childLanes: 0;
+    dependencies: null;
+    elementType: string;
+    firstEffect: null;
+    flags: 0;
+    index: 0;
+    key: string;
+    lanes: 0;
+    lastEffect: null;
+    memoizedProps: "";
+    memoizedState: null;
+    mode: 0;
+    nextEffect: null;
+    pendingProps: "";
+    ref: null;
+    return: Fiber;
+    sibling: null;
+    stateNode: "";
+    tag: 5;
+    type: "div";
+    updateQueue: null;
 }
