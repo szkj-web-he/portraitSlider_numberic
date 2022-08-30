@@ -37,6 +37,9 @@ const JumpWrap: React.FC<ScrollProps> = ({ children, style, ...props }) => {
     const rowTimer = useRef<number>();
 
     const [loading, setLoading] = useState(true);
+
+    const [isBottom, setIsBottom] = useState(false);
+
     /* <------------------------------------ **** STATE END **** ------------------------------------ */
     /* <------------------------------------ **** PARAMETER START **** ------------------------------------ */
     /************* This section will include this component parameter *************/
@@ -58,6 +61,7 @@ const JumpWrap: React.FC<ScrollProps> = ({ children, style, ...props }) => {
         if (!loading) {
             const data = getActiveStatus(ref.current, rowsRef.current);
             setShow(data.overflow);
+            setIsBottom(data.isBottom);
             activeIndex.current = data.active;
             setTopActive(data.active > 0);
             setBottomActive(data.active < rowsRef.current.length - 1);
@@ -94,6 +98,7 @@ const JumpWrap: React.FC<ScrollProps> = ({ children, style, ...props }) => {
             const data = getActiveStatus(ref.current, rowsRef.current);
             activeIndex.current = data.active;
             setTopActive(data.active > 0);
+            setIsBottom(data.isBottom);
             setBottomActive(data.active < rowsRef.current.length - 1);
         });
     };
@@ -109,6 +114,7 @@ const JumpWrap: React.FC<ScrollProps> = ({ children, style, ...props }) => {
             setShow(data.overflow);
             activeIndex.current = data.active;
             setTopActive(data.active > 0);
+            setIsBottom(data.isBottom);
             setBottomActive(data.active < rowsRef.current.length - 1);
         }, 17);
     };
@@ -152,7 +158,7 @@ const JumpWrap: React.FC<ScrollProps> = ({ children, style, ...props }) => {
                     <div
                         className="toBottom_button"
                         onClick={() => {
-                            if (!bottomActive) {
+                            if (!bottomActive || isBottom) {
                                 return;
                             }
 
@@ -168,7 +174,7 @@ const JumpWrap: React.FC<ScrollProps> = ({ children, style, ...props }) => {
                     >
                         <Triangle
                             className="bottom_triangle"
-                            color={bottomActive ? "#4D4D4D" : "#EBEBEB"}
+                            color={bottomActive && !isBottom ? "#4D4D4D" : "#EBEBEB"}
                         />
                     </div>
                 </div>

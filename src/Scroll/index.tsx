@@ -191,6 +191,7 @@ export const ScrollComponent = forwardRef<HTMLDivElement, ScrollProps>(
             setFocus(false);
             document.removeEventListener("mousemove", handleVerticalMove);
             document.removeEventListener("mouseup", handleVerticalUp);
+            window.removeEventListener("blur", handleVerticalUp);
         };
 
         const handleHorizontalMove = (e: MouseEvent) => {
@@ -220,6 +221,7 @@ export const ScrollComponent = forwardRef<HTMLDivElement, ScrollProps>(
             setFocus(false);
             document.removeEventListener("mousemove", handleHorizontalMove);
             document.removeEventListener("mouseup", handleHorizontalUp);
+            window.removeEventListener("blur", handleVerticalUp);
         };
 
         /**
@@ -276,11 +278,11 @@ export const ScrollComponent = forwardRef<HTMLDivElement, ScrollProps>(
          */
         const handleMouseDownOnVerticalBar = (e: React.MouseEvent<HTMLDivElement>) => {
             stopSelect(e, selectedFn, stopPropagation);
-
             point.current = e.pageY;
             setFocus(true);
             document.addEventListener("mousemove", handleVerticalMove);
             document.addEventListener("mouseup", handleVerticalUp);
+            window.addEventListener("blur", handleVerticalUp);
         };
 
         /**
@@ -293,6 +295,7 @@ export const ScrollComponent = forwardRef<HTMLDivElement, ScrollProps>(
             point.current = e.pageX;
             document.addEventListener("mousemove", handleHorizontalMove);
             document.addEventListener("mouseup", handleHorizontalUp);
+            window.addEventListener("blur", handleVerticalUp);
         };
         /********************* element ******************************************/
         /**

@@ -6,6 +6,7 @@ export const getActiveStatus = (
 ): {
     overflow: boolean;
     active: number;
+    isBottom: boolean;
 } => {
     const scrollBody = getScrollBody(scrollEl);
 
@@ -31,5 +32,8 @@ export const getActiveStatus = (
     return {
         overflow: !!(scrollBody && scrollBody.offsetHeight < scrollBody.scrollHeight),
         active: n,
+        isBottom: !!(
+            scrollBody && scrollBody.offsetHeight + scrollBody.scrollTop >= scrollBody.scrollHeight
+        ),
     };
 };
