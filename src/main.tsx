@@ -35,7 +35,7 @@ const Temp: React.FC = () => {
     const [colNumber, setColNumber] = useState(splitCol);
 
     const options = useMemo(() => {
-        const arr = comms.config.options ?? [];
+        const arr = comms.config.options?.[1] ?? [];
 
         if (!colNumber) {
             return [deepCloneData(arr)];
@@ -56,8 +56,8 @@ const Temp: React.FC = () => {
         return [...mapArr];
     }, [colNumber]);
 
-    const selectOptionRef = useRef<string>();
-    const [selectOption, setSelectOption] = useState<string>();
+    const selectOptionRef = useRef<{ row: string; col: string }>();
+    const [selectOption, setSelectOption] = useState<{ row: string; col: string }>();
 
     const rangeRef = useRef(deepCloneData(rulerData?.[1]));
 
@@ -78,7 +78,8 @@ const Temp: React.FC = () => {
             if (!selectOptionRef.current || !rangeRef.current) {
                 return;
             }
-            const scoreVal = scoreDataRef.current[selectOptionRef.current];
+            const scoreVal =
+                scoreDataRef.current[selectOptionRef.current.row][selectOptionRef.current.col];
 
             let n = -1;
             for (let i = 0; i < rangeRef.current.length; ) {
@@ -92,9 +93,10 @@ const Temp: React.FC = () => {
             }
 
             if (n >= 0) {
-                scoreDataRef.current[selectOptionRef.current] = rangeRef.current?.[n + status]
-                    ? rangeRef.current[n + status].value
-                    : rangeRef.current[n].value;
+                scoreDataRef.current[selectOptionRef.current.row][selectOptionRef.current.col] =
+                    rangeRef.current?.[n + status]
+                        ? rangeRef.current[n + status].value
+                        : rangeRef.current[n].value;
                 setScoreData({ ...scoreDataRef.current });
             }
         };
@@ -157,30 +159,31 @@ const Temp: React.FC = () => {
     /* <------------------------------------ **** PARAMETER END **** ------------------------------------ */
     /* <------------------------------------ **** FUNCTION START **** ------------------------------------ */
     /************* This section will include this component general function *************/
-    const getContentFn = (item: OptionProps) => {
+    const getContentFn = (item: OptionProps, row: OptionProps) => {
         return (
             <Slider
-                value={scoreData[item.code] ?? 0}
+                value={scoreData[row.code][item.code] ?? 0}
                 content={item.content}
                 range={rulerData?.[1]}
                 handleFocus={(status) => {
                     if (status) {
-                        selectOptionRef.current = item.code;
-                        setSelectOption(item.code);
+                        selectOptionRef.current = {
+                            row: row.code,
+                            col: item.code,
+                        };
+                        setSelectOption({
+                            row: row.code,
+                            col: item.code,
+                        });
                     } else {
                         selectOptionRef.current = undefined;
                         setSelectOption(undefined);
                     }
                 }}
-                active={selectOption === item.code}
+                active={selectOption?.row === row.code && selectOption.col === item.code}
                 setValue={(res) => {
-                    scoreDataRef.current[item.code] = res;
-                    setScoreData((pre) => {
-                        return {
-                            ...pre,
-                            ...{ [item.code]: res },
-                        };
-                    });
+                    scoreDataRef.current[row.code][item.code] = res;
+                    setScoreData({ ...scoreDataRef.current });
                 }}
             />
         );
@@ -190,64 +193,76 @@ const Temp: React.FC = () => {
 
     return (
         <div className="main">
-            {options.map((row, index) => {
+            {comms.config.options?.[0].map((item, n) => {
                 return (
-                    <Fragment key={index}>
-                        <Group
-                            index={index}
-                            className="options_row"
-                            style={
-                                colNumber
-                                    ? {
-                                          padding: "50px 0",
-                                      }
-                                    : {}
-                            }
-                        >
-                            {!!rulerData && (
-                                <Ruler
-                                    scales={rulerData[0].scale}
-                                    style={
-                                        colNumber
-                                            ? {}
-                                            : {
-                                                  transform: "translateY(-50px)",
-                                              }
-                                    }
-                                />
-                            )}
-                            {colNumber ? (
-                                <Row className="options_items" align="bottom">
-                                    {row.map((item) => {
-                                        return (
-                                            <Fragment key={item.code}>
-                                                <Col span={colNumber?.span as 2 | 3}>
-                                                    {getContentFn(item)}
-                                                </Col>
-                                            </Fragment>
-                                        );
-                                    })}
-                                </Row>
-                            ) : (
-                                <div className="options_items_mobile">
-                                    {row.map((item) => {
-                                        return (
-                                            <Fragment key={item.code}>
-                                                <div className="options_item_mobile">
-                                                    {getContentFn(item)}
-                                                </div>
-                                            </Fragment>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </Group>
-                        {options.length !== index + 1 || options.length !== 1 ? (
-                            <div className="options_blank" />
-                        ) : (
-                            <></>
-                        )}
-                    </Fragment>
+                    <div key={item.code}>
+                        <div
+                            className="question"
+                            dangerouslySetInnerHTML={{
+                                __html: item.content,
+                            }}
+                        />
+                        {options.map((row, index) => {
+                            return (
+                                <Fragment key={index}>
+                                    <Group
+                                        index={index + n}
+                                        className="options_row"
+                                        style={
+                                            colNumber
+                                                ? {
+                                                      padding: "50px 0",
+                                                  }
+                                                : {}
+                                        }
+                                    >
+                                        {!!rulerData && (
+                                            <Ruler
+                                                scales={rulerData[0].scale}
+                                                style={
+                                                    colNumber
+                                                        ? {}
+                                                        : {
+                                                              transform: "translateY(-50px)",
+                                                          }
+                                                }
+                                            />
+                                        )}
+                                        {colNumber ? (
+                                            <Row className="options_items" align="bottom">
+                                                {row.map((col) => {
+                                                    return (
+                                                        <Fragment key={col.code}>
+                                                            <Col span={colNumber?.span as 2 | 3}>
+                                                                {getContentFn(col, item)}
+                                                            </Col>
+                                                        </Fragment>
+                                                    );
+                                                })}
+                                            </Row>
+                                        ) : (
+                                            <div className="options_items_mobile">
+                                                {row.map((col) => {
+                                                    return (
+                                                        <Fragment key={col.code}>
+                                                            <div className="options_item_mobile">
+                                                                {getContentFn(col, item)}
+                                                            </div>
+                                                        </Fragment>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </Group>
+                                    {options.length !== index + 1 || options.length !== 1 ? (
+                                        <div className="options_blank" />
+                                    ) : (
+                                        <></>
+                                    )}
+                                </Fragment>
+                            );
+                        })}
+                    </div>
                 );
             })}
         </div>

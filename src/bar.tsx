@@ -57,9 +57,10 @@ const Temp: React.FC<TempProps> = ({
     });
 
     const id = useHashId("bar");
-    const setRoot = usePortalPosition(id);
 
-    const rootRef = useRef<HTMLDivElement | null>();
+    const rootRef = useRef<HTMLDivElement | null>(null);
+
+    const visibleChange = usePortalPosition(rootRef, id);
 
     const touchStartStatus = useRef(false);
 
@@ -124,12 +125,14 @@ const Temp: React.FC<TempProps> = ({
                 //延时展示
                 timer.current.show = window.setTimeout(() => {
                     setShow(true);
+                    visibleChange(true);
                     timer.current.show = null;
                 }, 500);
             }
         } else if (showRef.current) {
             timer.current.hidden = window.setTimeout(() => {
                 setShow(false);
+                visibleChange(false);
                 timer.current.hidden = null;
             }, 100);
         }
@@ -142,6 +145,7 @@ const Temp: React.FC<TempProps> = ({
         if (touchStartStatus.current || mouseStartStatus.current) {
             return;
         }
+
         hoverRef.current.root = true;
         changePortalVisible();
     };
@@ -182,6 +186,7 @@ const Temp: React.FC<TempProps> = ({
         timer.current.show && window.clearTimeout(timer.current.show);
         timer.current.hidden && window.clearTimeout(timer.current.hidden);
         setShow(false);
+        visibleChange(false);
         /******* 阻止hover事件 end *************/
 
         const activeEl = document.activeElement;
@@ -292,10 +297,7 @@ const Temp: React.FC<TempProps> = ({
                     onFocus={onFocus}
                     onBlur={onBlur}
                     tabIndex={-1}
-                    ref={(el) => {
-                        rootRef.current = el;
-                        setRoot(el);
-                    }}
+                    ref={rootRef}
                 >
                     <div className="bar_btnStart" />
                     <div className={`bar_btnContent${active ? " active" : ""}`}>{children}</div>
@@ -306,7 +308,7 @@ const Temp: React.FC<TempProps> = ({
                 <div
                     key={id}
                     className="bar_titleContent"
-                    style={show ? { opacity: 1 } : { opacity: 0, pointerEvents: "none" }}
+                    style={show ? {} : { opacity: 0, pointerEvents: "none" }}
                     onMouseEnter={() => {
                         hoverRef.current.portal = true;
                         changePortalVisible();

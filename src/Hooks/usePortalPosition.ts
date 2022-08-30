@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Fiber } from "../type";
 import { getScrollValue } from "../unit";
 
@@ -30,63 +30,55 @@ const findSiblingPortal = (key: string) => {
     return ref;
 };
 
-export const usePortalPosition = (key: string): ((ref: HTMLDivElement | null) => void) => {
-    const el = useRef<HTMLDivElement | null>(null);
-
-    const timer = useRef<number>();
-
-    useEffect(() => {
-        return () => {
-            timer.current && window.clearTimeout(timer.current);
-        };
-    }, []);
-
-    const setPosition = useCallback(() => {
-        timer.current && window.clearTimeout(timer.current);
-        timer.current = window.setTimeout(() => {
-            const node = el.current;
-            if (!node) {
-                return;
-            }
-            const rect = node.getBoundingClientRect();
-            const scrollData = getScrollValue();
-
-            const top = rect.top + scrollData.y;
-            let left = rect.left + scrollData.x + 13;
-
-            const portalEl = findSiblingPortal(key);
-            if (!portalEl) {
-                return;
-            }
-            const { width, height } = portalEl.getBoundingClientRect();
-            if (width + left > window.innerWidth) {
-                left = window.innerWidth - width - 8;
-            }
-
-            portalEl.style.transform = `translate(${left}px,${top - height - 2}px)`;
-        });
-    }, [key]);
+export const usePortalPosition = (
+    ref: React.MutableRefObject<HTMLDivElement | null>,
+    key: string,
+): React.Dispatch<React.SetStateAction<boolean>> => {
+    const [show, setShow] = useState(false);
 
     useEffect(() => {
-        return () => {
-            window.removeEventListener("resize", setPosition);
-            window.removeEventListener("scroll", setPosition, true);
-        };
-    }, [setPosition]);
+        let timer: null | number = null;
+        const setPosition = () => {
+            timer && window.clearTimeout(timer);
+            timer = window.setTimeout(() => {
+                const node = ref.current;
+                if (!node) {
+                    return;
+                }
+                const rect = node.getBoundingClientRect();
+                const scrollData = getScrollValue();
 
-    return useCallback(
-        (ref: HTMLDivElement | null) => {
-            if (el.current === ref) {
+                const top = rect.top + scrollData.y;
+                let left = rect.left + scrollData.x + 13;
+
+                const portalEl = findSiblingPortal(key);
+                if (!portalEl) {
+                    return;
+                }
+                const { width, height } = portalEl.getBoundingClientRect();
+                if (width + left > window.innerWidth) {
+                    left = window.innerWidth - width - 8;
+                }
+
+                portalEl.style.transform = `translate(${left}px,${top - height - 2}px)`;
+            });
+        };
+
+        const fn = () => {
+            if (!show) {
                 return;
             }
-            window.removeEventListener("resize", setPosition);
-            window.removeEventListener("scroll", setPosition, true);
-            el.current = ref;
-
             setPosition();
-            window.addEventListener("resize", setPosition);
-            window.addEventListener("scroll", setPosition, true);
-        },
-        [setPosition],
-    );
+        };
+        window.addEventListener("resize", fn);
+        window.addEventListener("scroll", fn, true);
+        setPosition();
+        return () => {
+            window.removeEventListener("resize", fn);
+            window.removeEventListener("scroll", fn, true);
+            timer && window.clearTimeout(timer);
+        };
+    }, [key, ref, show]);
+
+    return setShow;
 };
