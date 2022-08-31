@@ -223,7 +223,8 @@ const Temp: React.FC<TempProps> = ({
         if (!mouseStartStatus.current) {
             return;
         }
-
+        document.onselectstart = selectedFn.current;
+        selectedFn.current = null;
         onDragEnd?.();
         mouseStartStatus.current = false;
         document.removeEventListener("mousemove", handleMouseMove);
@@ -287,7 +288,8 @@ const Temp: React.FC<TempProps> = ({
         if (!touchStartStatus.current) {
             return;
         }
-
+        document.onselectstart = selectedFn.current;
+        selectedFn.current = null;
         touchStartStatus.current = false;
         window.removeEventListener("blur", handleTouchEnd);
         point.current = {
