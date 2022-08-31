@@ -1,6 +1,7 @@
 /* <------------------------------------ **** DEPENDENCE IMPORT START **** ------------------------------------ */
 /** This section will include all the necessary dependence for this tsx file */
 import React, { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { getScrollValue } from "../unit";
 import "./style.scss";
 import { stopSelect } from "./Unit/noSelected";
 import { setScrollBar } from "./Unit/setScrollBar";
@@ -100,7 +101,10 @@ export const ScrollComponent = forwardRef<HTMLDivElement, ScrollProps>(
 
         const smoothRef = useRef(isSmooth);
 
-        const point = useRef(0);
+        const offset = useRef({
+            x: 0,
+            y: 0,
+        });
 
         const selectedFn = useRef<typeof document.onselectstart>(null);
 
@@ -162,30 +166,28 @@ export const ScrollComponent = forwardRef<HTMLDivElement, ScrollProps>(
         /************* This section will include this component general function *************/
 
         const handleVerticalMove = (e: MouseEvent) => {
-            const y = e.pageY;
-
-            let move = y - point.current;
-            point.current = y;
-
             const node = scrollEl.current;
-            if (node) {
-                move = (move / node.offsetHeight) * node.scrollHeight;
-
-                let value = node.scrollTop + move;
-                if (value < 0) {
-                    value = 0;
-                } else if (value + node.offsetHeight > node.scrollHeight) {
-                    value = node.scrollHeight - node.offsetHeight;
-                }
-
-                node.scrollTo({
-                    top: value,
-                });
+            if (!node) {
+                return;
             }
+
+            const { pageY } = e;
+
+            const y = pageY - offset.current.y;
+
+            const { top } = node.getBoundingClientRect();
+
+            const scrollData = getScrollValue();
+
+            const val = y - (top + scrollData.y);
+
+            node.scrollTo({
+                top: (node.scrollHeight / node.offsetHeight) * val,
+            });
         };
 
         const handleVerticalUp = () => {
-            point.current = 0;
+            offset.current.y = 0;
             document.onselectstart = selectedFn.current;
             selectedFn.current = null;
             setFocus(false);
@@ -195,27 +197,28 @@ export const ScrollComponent = forwardRef<HTMLDivElement, ScrollProps>(
         };
 
         const handleHorizontalMove = (e: MouseEvent) => {
-            const x = e.pageX;
-
-            let move = x - point.current;
-            point.current = x;
-
             const node = scrollEl.current;
-            if (node) {
-                move = (move / node.offsetWidth) * node.scrollWidth;
-                let value = node.scrollLeft + move;
-                if (value < 0) {
-                    value = 0;
-                } else if (value + node.offsetWidth > node.scrollWidth) {
-                    value = node.scrollWidth - node.offsetWidth;
-                }
-                node.scrollTo({
-                    left: value,
-                });
+            if (!node) {
+                return;
             }
+
+            const { pageX } = e;
+
+            const x = pageX - offset.current.x;
+
+            const { left } = node.getBoundingClientRect();
+
+            const scrollData = getScrollValue();
+
+            const val = x - (left + scrollData.x);
+
+            node.scrollTo({
+                left: (node.scrollWidth / node.offsetWidth) * val,
+            });
         };
+
         const handleHorizontalUp = () => {
-            point.current = 0;
+            offset.current.x = 0;
             document.onselectstart = selectedFn.current;
             selectedFn.current = null;
             setFocus(false);
@@ -278,7 +281,12 @@ export const ScrollComponent = forwardRef<HTMLDivElement, ScrollProps>(
          */
         const handleMouseDownOnVerticalBar = (e: React.MouseEvent<HTMLDivElement>) => {
             stopSelect(e, selectedFn, stopPropagation);
-            point.current = e.pageY;
+
+            const el = e.currentTarget;
+            const scrollData = getScrollValue();
+            const rect = el.getBoundingClientRect();
+            offset.current.y = e.pageY - (rect.top + scrollData.y);
+
             setFocus(true);
             document.addEventListener("mousemove", handleVerticalMove);
             document.addEventListener("mouseup", handleVerticalUp);
@@ -291,8 +299,13 @@ export const ScrollComponent = forwardRef<HTMLDivElement, ScrollProps>(
          */
         const handleMouseDownOnHorizontalBar = (e: React.MouseEvent<HTMLDivElement>) => {
             stopSelect(e, selectedFn, stopPropagation);
+
+            const el = e.currentTarget;
+            const scrollData = getScrollValue();
+            const rect = el.getBoundingClientRect();
+            offset.current.x = e.pageX - (rect.left + scrollData.x);
+
             setFocus(true);
-            point.current = e.pageX;
             document.addEventListener("mousemove", handleHorizontalMove);
             document.addEventListener("mouseup", handleHorizontalUp);
             window.addEventListener("blur", handleVerticalUp);

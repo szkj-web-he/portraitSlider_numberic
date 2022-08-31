@@ -8,11 +8,12 @@
 /** This section will include all the necessary dependence for this tsx file */
 import React, { useEffect, useRef, useState } from "react";
 import { ScrollComponent, ScrollProps } from "../../Scroll";
-import Triangle from "./Unit/triangle";
-import { JumpContext, JumpContextType } from "../Group/Unit/context";
-import { getActiveStatus } from "./Unit/getActiveStatus";
-import { getScrollBody } from "./Unit/getScrollBody";
+import { JumpContext } from "../Group/Unit/context";
+import { useHashId } from "./../../Hooks/useHashId";
 import "./style.scss";
+import { getScrollBody } from "./Unit/getScrollBody";
+import Triangle from "./Unit/triangle";
+import { getElements, useActiveStatus } from "./Unit/useActiveStatus";
 /* <------------------------------------ **** DEPENDENCE IMPORT END **** ------------------------------------ */
 /* <------------------------------------ **** INTERFACE START **** ------------------------------------ */
 /** This section will include all the interface for this tsx file */
@@ -22,24 +23,18 @@ const JumpWrap: React.FC<ScrollProps> = ({ children, style, ...props }) => {
     /* <------------------------------------ **** STATE START **** ------------------------------------ */
     /************* This section will include this component HOOK function *************/
 
-    const [show, setShow] = useState(false);
-    const [topActive, setTopActive] = useState(false);
-    const [bottomActive, setBottomActive] = useState(false);
-
-    const activeIndex = useRef(0);
+    const id = useHashId("jumpWrap");
 
     const ref = useRef<HTMLDivElement | null>(null);
 
     const timer = useRef<number>();
 
-    const rowsRef = useRef<Array<HTMLElement | null>>([]);
-
-    const rowTimer = useRef<number>();
-
     const [loading, setLoading] = useState(true);
 
-    const [isBottom, setIsBottom] = useState(false);
-
+    const { show, topActive, bottomActive, activeIndex, isBottom, update } = useActiveStatus(
+        ref,
+        id,
+    );
     /* <------------------------------------ **** STATE END **** ------------------------------------ */
     /* <------------------------------------ **** PARAMETER START **** ------------------------------------ */
     /************* This section will include this component parameter *************/
@@ -53,33 +48,20 @@ const JumpWrap: React.FC<ScrollProps> = ({ children, style, ...props }) => {
     useEffect(() => {
         return () => {
             timer.current && window.clearTimeout(timer.current);
-            rowTimer.current && window.clearTimeout(rowTimer.current);
         };
     }, []);
 
     useEffect(() => {
         if (!loading) {
-            const data = getActiveStatus(ref.current, rowsRef.current);
-            setShow(data.overflow);
-            setIsBottom(data.isBottom);
-            activeIndex.current = data.active;
-            setTopActive(data.active > 0);
-            setBottomActive(data.active < rowsRef.current.length - 1);
+            update();
         }
-    }, [loading]);
+    }, [loading, update]);
 
     useEffect(() => {
-        const fn = () => {
-            const data = getActiveStatus(ref.current, rowsRef.current);
-            setShow(data.overflow);
-            activeIndex.current = data.active;
-            setTopActive(data.active > 0);
-            setBottomActive(data.active < rowsRef.current.length - 1);
-        };
         let timer: null | number = null;
         const mainFn = () => {
             timer && window.clearTimeout(timer);
-            timer = window.setTimeout(fn);
+            timer = window.setTimeout(update);
         };
 
         window.addEventListener("resize", mainFn);
@@ -87,41 +69,56 @@ const JumpWrap: React.FC<ScrollProps> = ({ children, style, ...props }) => {
             window.removeEventListener("resize", mainFn);
             timer && window.clearTimeout(timer);
         };
-    }, []);
+    }, [update]);
 
     /* <------------------------------------ **** PARAMETER END **** ------------------------------------ */
     /* <------------------------------------ **** FUNCTION START **** ------------------------------------ */
     /************* This section will include this component general function *************/
-    const handleScroll = () => {
-        timer.current && window.clearTimeout(timer.current);
-        timer.current = window.setTimeout(() => {
-            const data = getActiveStatus(ref.current, rowsRef.current);
-            activeIndex.current = data.active;
-            setTopActive(data.active > 0);
-            setIsBottom(data.isBottom);
-            setBottomActive(data.active < rowsRef.current.length - 1);
+    // getElements
+    const jumpTo = (n: number) => {
+        const scrollBody = getScrollBody(ref.current);
+        if (!scrollBody) {
+            return;
+        }
+        if (n < 0) {
+            n = 0;
+        }
+
+        const arr = getElements(id);
+
+        if (n >= arr.length) {
+            n = arr.length - 1;
+        }
+
+        let toEl: HTMLElement | null = null;
+        for (let i = 0; i < arr.length; ) {
+            const el = arr[i];
+            const index = Number(el.getAttribute("data-index"));
+            if (index === n) {
+                toEl = el;
+                i = arr.length;
+            } else {
+                ++i;
+            }
+        }
+
+        if (!toEl) {
+            return;
+        }
+        scrollBody.scrollTo({
+            top: toEl.offsetTop,
+            behavior: "smooth",
         });
     };
 
-    const callback: JumpContextType = (index, el) => {
-        if (loading) {
-            return;
-        }
-        rowsRef.current[index] = el;
-        rowTimer.current && window.clearTimeout(rowTimer.current);
-        rowTimer.current = window.setTimeout(() => {
-            const data = getActiveStatus(ref.current, rowsRef.current);
-            setShow(data.overflow);
-            activeIndex.current = data.active;
-            setTopActive(data.active > 0);
-            setIsBottom(data.isBottom);
-            setBottomActive(data.active < rowsRef.current.length - 1);
-        }, 17);
+    const handleScroll = () => {
+        timer.current && window.clearTimeout(timer.current);
+        timer.current = window.setTimeout(update, 50);
     };
 
     /* <------------------------------------ **** FUNCTION END **** ------------------------------------ */
     return (
-        <JumpContext.Provider value={callback}>
+        <JumpContext.Provider value={id}>
             <ScrollComponent
                 handleBarChange={handleScroll}
                 style={style}
@@ -140,14 +137,7 @@ const JumpWrap: React.FC<ScrollProps> = ({ children, style, ...props }) => {
                                 return;
                             }
 
-                            const scrollBody = getScrollBody(ref.current);
-                            if (!scrollBody) {
-                                return;
-                            }
-                            scrollBody.scrollTo({
-                                top: rowsRef.current[activeIndex.current - 1]?.offsetTop ?? 0,
-                                behavior: "smooth",
-                            });
+                            jumpTo(activeIndex.current - 1);
                         }}
                     >
                         <Triangle
@@ -162,14 +152,7 @@ const JumpWrap: React.FC<ScrollProps> = ({ children, style, ...props }) => {
                                 return;
                             }
 
-                            const scrollBody = getScrollBody(ref.current);
-                            if (!scrollBody) {
-                                return;
-                            }
-                            scrollBody.scrollTo({
-                                top: rowsRef.current[activeIndex.current + 1]?.offsetTop ?? 0,
-                                behavior: "smooth",
-                            });
+                            jumpTo(activeIndex.current + 1);
                         }}
                     >
                         <Triangle
