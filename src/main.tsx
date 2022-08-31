@@ -197,7 +197,7 @@ const Temp: React.FC = () => {
                 return (
                     <div key={item.code}>
                         <div
-                            className="question"
+                            className="options_header"
                             dangerouslySetInnerHTML={{
                                 __html: item.content,
                             }}
@@ -206,7 +206,7 @@ const Temp: React.FC = () => {
                             return (
                                 <Fragment key={index}>
                                     <Group
-                                        index={index + n}
+                                        index={index + n * options.length}
                                         className="options_row"
                                         style={
                                             colNumber

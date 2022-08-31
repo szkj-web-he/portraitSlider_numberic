@@ -18,11 +18,11 @@ export interface GroupProps extends React.HTMLAttributes<HTMLDivElement> {
 /* <------------------------------------ **** INTERFACE END **** ------------------------------------ */
 /* <------------------------------------ **** FUNCTION COMPONENT START **** ------------------------------------ */
 export const Group = forwardRef<HTMLDivElement, GroupProps>(
-    ({ children, index, ...props }, ref) => {
+    ({ className, children, index, ...props }, ref) => {
         Group.displayName = "Group";
         /* <------------------------------------ **** STATE START **** ------------------------------------ */
         /************* This section will include this component HOOK function *************/
-        const setGroupEl = useGroupEl();
+        const id = useGroupEl();
         /* <------------------------------------ **** STATE END **** ------------------------------------ */
         /* <------------------------------------ **** PARAMETER START **** ------------------------------------ */
         /************* This section will include this component parameter *************/
@@ -32,14 +32,15 @@ export const Group = forwardRef<HTMLDivElement, GroupProps>(
         /* <------------------------------------ **** FUNCTION END **** ------------------------------------ */
         return (
             <div
+                className={id + (className ? ` ${className}` : "")}
                 ref={(el) => {
-                    setGroupEl(index, el);
                     if (typeof ref === "function") {
                         ref(el);
                     } else if (ref !== null) {
                         (ref as React.MutableRefObject<HTMLElement | null>).current = el;
                     }
                 }}
+                data-index={index}
                 {...props}
             >
                 {children}
