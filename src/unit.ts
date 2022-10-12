@@ -158,13 +158,13 @@ export const getScrollValue = (): {
     };
 };
 
-export const initScore = (): Record<string, number> => {
+export const initScore = (): Record<string, number | null> => {
     const arr = comms.config.options ?? [];
 
-    const data: Record<string, number> = {};
+    const data: Record<string, number | null> = {};
     for (let i = 0; i < arr.length; i++) {
         const item = deepCloneData(arr[i]);
-        data[item.code] = 0;
+        data[item.code] = null;
     }
     return { ...data };
 };
