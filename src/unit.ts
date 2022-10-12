@@ -158,17 +158,17 @@ export const getScrollValue = (): {
     };
 };
 
-export const initScore = (): Record<string, Record<string, number>> => {
+export const initScore = (): Record<string, Record<string, null | number>> => {
     const rows = comms.config.options?.[0] ?? [];
     const cols = comms.config.options?.[1] ?? [];
 
-    const data: Record<string, Record<string, number>> = {};
+    const data: Record<string, Record<string, null | number>> = {};
 
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         for (let j = 0; j < cols.length; j++) {
             const col = cols[j];
-            data[row.code] = Object.assign({}, data[row.code], { [col.code]: 0 });
+            data[row.code] = Object.assign({}, data[row.code], { [col.code]: null });
         }
     }
 

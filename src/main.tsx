@@ -66,7 +66,28 @@ const Temp: React.FC = () => {
     /************* This section will include this component parameter *************/
 
     useEffect(() => {
-        comms.state = deepCloneData(scoreData);
+        let end = false;
+        const timer = setTimeout(() => {
+            if (end) {
+                return;
+            }
+            const data: Record<string, Record<string, number>> = {};
+            for (const key in scoreData) {
+                const item: Record<string, number> = {};
+                for (const subKey in scoreData[key]) {
+                    const val = scoreData[key][subKey];
+                    if (typeof val === "number") {
+                        item[subKey] = val;
+                    }
+                }
+                data[key] = item;
+            }
+            comms.state = data;
+        });
+        return () => {
+            end = true;
+            clearTimeout(timer);
+        };
     }, [scoreData]);
 
     useLayoutEffect(() => {
@@ -79,7 +100,7 @@ const Temp: React.FC = () => {
                 return;
             }
             const scoreVal =
-                scoreDataRef.current[selectOptionRef.current.row][selectOptionRef.current.col];
+                scoreDataRef.current[selectOptionRef.current.row][selectOptionRef.current.col] ?? 0;
 
             let n = -1;
             for (let i = 0; i < rangeRef.current.length; ) {
