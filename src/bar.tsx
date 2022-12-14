@@ -10,7 +10,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useHashId } from "./Hooks/useHashId";
 import { usePortalPosition } from "./Hooks/usePortalPosition";
-import { stopSelect } from "./Scroll/Unit/noSelected";
+import { stopSelect } from "./unit";
 import { PointProps } from "./type";
 import { createPortalEl, getScrollValue } from "./unit";
 /* <------------------------------------ **** DEPENDENCE IMPORT END **** ------------------------------------ */

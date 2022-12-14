@@ -1,6 +1,9 @@
 import { comms } from ".";
-import { isMobile } from "./isMobile";
 import { ScaleAttr, ScaleProps } from "./type";
+
+export const isMobile = (): boolean => {
+    return window.matchMedia("(any-pointer:coarse)").matches;
+};
 
 export const deepCloneData = <T>(data: T): T => {
     if (data == null) {
@@ -167,4 +170,15 @@ export const initScore = (): Record<string, number | null> => {
         data[item.code] = null;
     }
     return { ...data };
+};
+
+export const stopSelect = (
+    e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLDivElement>,
+    selectedFn: { current: typeof document.onselectstart },
+    stopPropagation?: boolean,
+): void => {
+    stopPropagation && e.stopPropagation();
+    window.getSelection()?.removeAllRanges();
+    selectedFn.current = document.onselectstart;
+    document.onselectstart = () => false;
 };

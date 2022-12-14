@@ -6,7 +6,7 @@ $fontFamily: alipuhui, sans-serif;
 html,
 .wrapper,
 body,
-body > div:not([class], [id]) {
+body > div:first-child {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -21,7 +21,6 @@ body {
 
 .wrapper {
     background-color: #fff;
-    padding: 0 5px;
 }
 
 .question {

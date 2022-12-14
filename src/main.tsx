@@ -71,15 +71,12 @@ const Temp: React.FC = () => {
             if (end) {
                 return;
             }
-            const data: Record<string, number> = {};
+            const data: Record<string, number | null> = {};
             for (const key in scoreData) {
                 const val = scoreData[key];
-                if (typeof val === "number") {
-                    data[key] = val;
-                }
+                data[key] = typeof val === "number" ? val : null;
             }
             comms.state = data;
-            console.log(JSON.stringify(data));
         });
         return () => {
             end = true;
