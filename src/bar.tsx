@@ -10,7 +10,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useHashId } from "./Hooks/useHashId";
 import { usePortalPosition } from "./Hooks/usePortalPosition";
-import { stopSelect } from "./Scroll/Unit/noSelected";
+import { useTouch } from "./Hooks/useTouch";
 import { PointProps } from "./type";
 import { createPortalEl, getScrollValue } from "./unit";
 /* <------------------------------------ **** DEPENDENCE IMPORT END **** ------------------------------------ */
@@ -44,8 +44,6 @@ const Temp: React.FC<TempProps> = ({
 
     const showRef = useRef(false);
 
-    const selectedFn = useRef<typeof document.onselectstart>(null);
-
     const hoverRef = useRef({
         portal: false,
         root: false,
@@ -61,18 +59,84 @@ const Temp: React.FC<TempProps> = ({
 
     const id = useHashId("bar");
 
-    const rootRef = useRef<HTMLDivElement | null>(null);
+    const touchStatus = useRef(false);
 
-    const visibleChange = usePortalPosition(rootRef, id);
-
-    const touchStartStatus = useRef(false);
-
-    const mouseStartStatus = useRef(false);
+    const globalClass = useRef<HTMLStyleElement>();
 
     const point = useRef<PointProps>({
         offsetX: 0,
         offsetY: 0,
     });
+
+    const rootRef = useTouch(
+        (res) => {
+            //开始触摸
+            const node = rootRef.current;
+            if (!node) {
+                return;
+            }
+
+            touchStatus.current = true;
+
+            onDragStart?.();
+            /******* 阻止hover事件 start *************/
+            timer.current.show && window.clearTimeout(timer.current.show);
+            timer.current.hidden && window.clearTimeout(timer.current.hidden);
+            setShow(false);
+            visibleChange(false);
+            /******* 阻止hover事件 end *************/
+            const rect = node.getBoundingClientRect();
+            const scrollData = getScrollValue();
+            const rectX = rect.left + scrollData.x;
+            const rectY = rect.top + scrollData.y;
+            point.current = {
+                offsetX: res.pageX - rectX,
+                offsetY: res.pageY - rectY,
+            };
+
+            const activeEl = document.activeElement;
+            if (activeEl !== rootRef.current) {
+                node.focus({
+                    preventScroll: true,
+                });
+            }
+
+            const pointerStyle = window.getComputedStyle(node, null).cursor;
+            globalClass.current = document.createElement("style");
+            globalClass.current.innerHTML = `
+            *{
+                cursor:${pointerStyle} !important;
+            }
+            `;
+            document.head.append(globalClass.current);
+        },
+        ({ pageY }) => {
+            onDragMove?.(pageY - point.current.offsetY);
+        },
+        () => {
+            point.current = {
+                offsetX: 0,
+                offsetY: 0,
+            };
+            onDragEnd?.();
+            touchStatus.current = false;
+            globalClass.current?.remove();
+            globalClass.current = undefined;
+        },
+        () => {
+            point.current = {
+                offsetX: 0,
+                offsetY: 0,
+            };
+            onDragEnd?.();
+            touchStatus.current = false;
+            globalClass.current?.remove();
+            globalClass.current = undefined;
+        },
+    );
+
+    const visibleChange = usePortalPosition(rootRef, id);
+
     /* <------------------------------------ **** STATE END **** ------------------------------------ */
     /* <------------------------------------ **** PARAMETER START **** ------------------------------------ */
     /************* This section will include this component parameter *************/
@@ -149,7 +213,7 @@ const Temp: React.FC<TempProps> = ({
      * 当root的mouse enter时
      */
     const handleMouseEnter = () => {
-        if (touchStartStatus.current || mouseStartStatus.current) {
+        if (touchStatus.current) {
             return;
         }
 
@@ -161,141 +225,12 @@ const Temp: React.FC<TempProps> = ({
      * 当root的mouse leave时
      */
     const handleMouseLeave = () => {
-        if (touchStartStatus.current || mouseStartStatus.current) {
+        if (touchStatus.current) {
             return;
         }
 
         hoverRef.current.root = false;
         changePortalVisible();
-    };
-
-    const handleDragStart = (
-        res: {
-            pageX: number;
-            pageY: number;
-            clientX: number;
-            clientY: number;
-        },
-        e: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLDivElement>,
-    ) => {
-        const rect = rootRef.current?.getBoundingClientRect();
-        if (!rect) {
-            return;
-        }
-
-        stopSelect(e, selectedFn, false);
-
-        onDragStart?.();
-        const scrollData = getScrollValue();
-        const rectX = rect.left + scrollData.x;
-        const rectY = rect.top + scrollData.y;
-        point.current = {
-            offsetX: res.pageX - rectX,
-            offsetY: res.pageY - rectY,
-        };
-        if (!rootRef.current) {
-            return;
-        }
-        /******* 阻止hover事件 start *************/
-        timer.current.show && window.clearTimeout(timer.current.show);
-        timer.current.hidden && window.clearTimeout(timer.current.hidden);
-        setShow(false);
-        visibleChange(false);
-        /******* 阻止hover事件 end *************/
-
-        const activeEl = document.activeElement;
-        if (activeEl !== rootRef.current) {
-            rootRef.current.focus({
-                preventScroll: true,
-            });
-        }
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-        if (!mouseStartStatus.current) {
-            return;
-        }
-        const value = e.pageY - point.current.offsetY;
-        onDragMove?.(value);
-    };
-
-    const handleMouseUp = () => {
-        if (!mouseStartStatus.current) {
-            return;
-        }
-        document.onselectstart = selectedFn.current;
-        selectedFn.current = null;
-        onDragEnd?.();
-        mouseStartStatus.current = false;
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-        window.removeEventListener("blur", handleMouseUp);
-        point.current = {
-            offsetX: 0,
-            offsetY: 0,
-        };
-    };
-
-    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (touchStartStatus.current) {
-            return;
-        }
-        mouseStartStatus.current = true;
-        handleDragStart(
-            {
-                pageX: e.pageX,
-                pageY: e.pageY,
-                clientX: e.clientX,
-                clientY: e.clientY,
-            },
-            e,
-        );
-        document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseup", handleMouseUp);
-        window.addEventListener("blur", handleMouseUp);
-    };
-
-    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (mouseStartStatus.current) {
-            return;
-        }
-
-        touchStartStatus.current = true;
-        const position = e.targetTouches[0];
-        handleDragStart(
-            {
-                pageX: position.pageX,
-                pageY: position.pageY,
-                clientX: position.clientX,
-                clientY: position.clientY,
-            },
-            e,
-        );
-        window.addEventListener("blur", handleTouchEnd);
-    };
-
-    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (!touchStartStatus.current) {
-            return;
-        }
-
-        const position = e.targetTouches[0];
-        const value = position.pageY - point.current.offsetY;
-        onDragMove?.(value);
-    };
-
-    const handleTouchEnd = () => {
-        if (!touchStartStatus.current) {
-            return;
-        }
-        document.onselectstart = selectedFn.current;
-        selectedFn.current = null;
-        touchStartStatus.current = false;
-        window.removeEventListener("blur", handleTouchEnd);
-        point.current = {
-            offsetX: 0,
-            offsetY: 0,
-        };
     };
 
     /* <------------------------------------ **** FUNCTION END **** ------------------------------------ */
@@ -311,11 +246,6 @@ const Temp: React.FC<TempProps> = ({
                     className="bar_btn"
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
-                    onMouseDown={handleMouseDown}
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    onTouchCancel={handleTouchEnd}
                     onFocus={onFocus}
                     onBlur={onBlur}
                     tabIndex={-1}
