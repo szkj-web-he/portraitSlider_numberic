@@ -161,20 +161,44 @@ export const getScrollValue = (): {
     };
 };
 
+/**
+ * 获取从state回溯回来的数据
+ */
+const getState = () => {
+    const state = comms.state as Record<string, string>;
+    const stateData: Record<string, Record<string, null | number>> = {};
+
+    for (const keyStr in state) {
+        const key = keyStr.split("#")[1];
+        const keys = key.includes("_") ? key.split("_") : "";
+
+        const rowCode = keys[0];
+        const colCode = keys[1];
+
+        stateData[rowCode] = Object.assign({}, stateData[rowCode], {
+            [colCode]: Number(state[keyStr]),
+        });
+    }
+    return stateData;
+};
+
 export const initScore = (): Record<string, Record<string, null | number>> => {
     const rows = comms.config.options?.[0] ?? [];
     const cols = comms.config.options?.[1] ?? [];
 
     const data: Record<string, Record<string, null | number>> = {};
 
+    const state = getState();
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         for (let j = 0; j < cols.length; j++) {
             const col = cols[j];
-            data[row.code] = Object.assign({}, data[row.code], { [col.code]: null });
+            data[row.code] = Object.assign({}, data[row.code], {
+                [col.code]: state?.[row.code]?.[col.code] ?? null,
+            });
         }
     }
-
+    console.log(JSON.stringify(data));
     return { ...data };
 };
 

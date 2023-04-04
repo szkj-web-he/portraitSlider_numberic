@@ -26,9 +26,13 @@ const Temp: React.FC = () => {
     /* <------------------------------------ **** STATE START **** ------------------------------------ */
     /************* This section will include this component HOOK function *************/
 
-    const scoreDataRef = useRef(initScore());
+    const scoreDataRef = useRef<ReturnType<typeof initScore>>({});
 
-    const [scoreData, setScoreData] = useState(initScore);
+    const [scoreData, setScoreData] = useState(() => {
+        const data = initScore();
+        scoreDataRef.current = deepCloneData(data);
+        return data;
+    });
 
     const rulerData = useRuler();
 
@@ -71,13 +75,15 @@ const Temp: React.FC = () => {
             if (end) {
                 return;
             }
-            const data: Record<string, Record<string, number>> = {};
+            const data: Record<string, Record<string, number | null>> = {};
             for (const key in scoreData) {
-                const item: Record<string, number> = {};
+                const item: Record<string, number | null> = {};
                 for (const subKey in scoreData[key]) {
                     const val = scoreData[key][subKey];
                     if (typeof val === "number") {
                         item[subKey] = val;
+                    } else {
+                        item[subKey] = null;
                     }
                 }
                 data[key] = item;
@@ -100,7 +106,8 @@ const Temp: React.FC = () => {
                 return;
             }
             const scoreVal =
-                scoreDataRef.current[selectOptionRef.current.row][selectOptionRef.current.col] ?? 0;
+                scoreDataRef.current?.[selectOptionRef.current.row][selectOptionRef.current.col] ??
+                0;
 
             let n = -1;
             for (let i = 0; i < rangeRef.current.length; ) {

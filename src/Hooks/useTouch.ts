@@ -17,6 +17,8 @@ export const useTouch = (
     const ref = useRef<HTMLDivElement | null>(null);
     const mobileStatus = useMobile();
 
+    const timer = useRef<number | null>(null);
+
     const selectedFn = useRef<typeof document.onselectstart>(null);
     /**
      * 开始的事件
@@ -35,18 +37,10 @@ export const useTouch = (
      */
     const cancelFn = useRef(handleCancel);
 
-    useLayoutEffect(() => {
-        startFn.current = handleStart;
-    }, [handleStart]);
-    useLayoutEffect(() => {
-        endFn.current = handleEnd;
-    }, [handleEnd]);
-    useLayoutEffect(() => {
-        moveFn.current = handleMove;
-    }, [handleMove]);
-    useLayoutEffect(() => {
-        cancelFn.current = handleCancel;
-    }, [handleCancel]);
+    startFn.current = handleStart;
+    endFn.current = handleEnd;
+    moveFn.current = handleMove;
+    cancelFn.current = handleCancel;
 
     /**
      * 移动端事件
@@ -62,6 +56,7 @@ export const useTouch = (
             document.removeEventListener("touchmove", handleTouchMove, options);
             document.removeEventListener("touchend", handleTouchEnd, options);
             document.removeEventListener("touchcancel", handleTouchCancel, options);
+            timer.current && window.clearTimeout(timer.current);
             if (!node) {
                 return;
             }
@@ -79,12 +74,15 @@ export const useTouch = (
             e.stopImmediatePropagation();
 
             const { pageX, pageY, clientX, clientY } = e.changedTouches[0];
-
-            moveFn.current({
-                pageX,
-                pageY,
-                clientX,
-                clientY,
+            timer.current && window.clearTimeout(timer.current);
+            timer.current = window.setTimeout(() => {
+                timer.current = null;
+                moveFn.current({
+                    pageX,
+                    pageY,
+                    clientX,
+                    clientY,
+                });
             });
         };
 
@@ -119,7 +117,7 @@ export const useTouch = (
             }
             e.preventDefault();
             e.stopImmediatePropagation();
-
+            timer.current && window.clearTimeout(timer.current);
             startFn.current({
                 pageX: e.changedTouches[0].pageX,
                 pageY: e.changedTouches[0].pageY,
@@ -153,6 +151,7 @@ export const useTouch = (
             window.removeEventListener("blur", handleMouseCancel, true);
             document.onselectstart = selectedFn.current;
             selectedFn.current = null;
+            timer.current && window.clearTimeout(timer.current);
         };
 
         const removeSelect = (e: MouseEvent) => {
@@ -160,16 +159,20 @@ export const useTouch = (
             window.getSelection()?.removeAllRanges();
             selectedFn.current = document.onselectstart;
             document.onselectstart = () => false;
+            timer.current && window.clearTimeout(timer.current);
         };
 
         const handleMouseMove = (e: MouseEvent) => {
             const { pageX, pageY, clientX, clientY } = e;
-
-            moveFn.current({
-                pageX,
-                pageY,
-                clientX,
-                clientY,
+            timer.current && window.clearTimeout(timer.current);
+            timer.current = window.setTimeout(() => {
+                timer.current = null;
+                moveFn.current({
+                    pageX,
+                    pageY,
+                    clientX,
+                    clientY,
+                });
             });
         };
 

@@ -6,7 +6,7 @@
  */
 /* <------------------------------------ **** DEPENDENCE IMPORT START **** ------------------------------------ */
 /** This section will include all the necessary dependence for this tsx file */
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useHashId } from "./Hooks/useHashId";
 import { usePortalPosition } from "./Hooks/usePortalPosition";
@@ -136,14 +136,10 @@ const Temp: React.FC<TempProps> = ({
     );
 
     const visibleChange = usePortalPosition(rootRef, id);
-
+    showRef.current = show;
     /* <------------------------------------ **** STATE END **** ------------------------------------ */
     /* <------------------------------------ **** PARAMETER START **** ------------------------------------ */
     /************* This section will include this component parameter *************/
-
-    useLayoutEffect(() => {
-        showRef.current = show;
-    }, [show]);
 
     useEffect(() => {
         const timerData = timer.current;
@@ -176,6 +172,7 @@ const Temp: React.FC<TempProps> = ({
         return () => {
             timerFocus && window.clearTimeout(timerFocus);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [active]);
 
     /* <------------------------------------ **** PARAMETER END **** ------------------------------------ */
