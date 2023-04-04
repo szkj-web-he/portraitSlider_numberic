@@ -26,9 +26,14 @@ const Temp: React.FC = () => {
     /* <------------------------------------ **** STATE START **** ------------------------------------ */
     /************* This section will include this component HOOK function *************/
 
-    const scoreDataRef = useRef(initScore());
+    const scoreDataRef = useRef<ReturnType<typeof initScore>>({});
 
-    const [scoreData, setScoreData] = useState(initScore);
+    const [scoreData, setScoreData] = useState(() => {
+        const data = initScore();
+        scoreDataRef.current = deepCloneData(data);
+
+        return data;
+    });
 
     const rulerData = useRuler();
 

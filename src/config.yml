@@ -1,7 +1,7 @@
 # The question text can be modified by the survey owner.
 question: "Q1. 请您对下列品牌的喜爱度打分"
 # The instructions to the question can be modified by the survey owner. It's recommended that the existing instructions are included in the customised instructions.
-instruction: "请通过移动滑块进行打分"
+instruction: ""
 # For the purposes of reproducing a bug
 options: [
         # [

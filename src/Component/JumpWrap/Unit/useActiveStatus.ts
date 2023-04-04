@@ -58,7 +58,7 @@ export const useActiveStatus = (
         }
 
         const arr = getElements(id);
-        let n = -1;
+        let n = arr.length - 1;
         for (let i = 0; i < arr.length; ) {
             const item = arr[i];
             const marginTop = sameTop(item, scrollBody);

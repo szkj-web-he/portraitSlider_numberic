@@ -161,13 +161,30 @@ export const getScrollValue = (): {
     };
 };
 
+/**
+ * 获取从state回溯回来的数据
+ */
+const getState = () => {
+    const state = comms.state as Record<string, string>;
+    const stateData: Record<string, null | number> = {};
+
+    for (const keyStr in state) {
+        const key = keyStr.split("#")[1];
+
+        stateData[key] = Number(state[keyStr]);
+    }
+    return stateData;
+};
+
 export const initScore = (): Record<string, number | null> => {
     const arr = comms.config.options ?? [];
+
+    const state = getState();
 
     const data: Record<string, number | null> = {};
     for (let i = 0; i < arr.length; i++) {
         const item = deepCloneData(arr[i]);
-        data[item.code] = null;
+        data[item.code] = state[item.code] ?? null;
     }
     return { ...data };
 };

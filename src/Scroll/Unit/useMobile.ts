@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 const isMobile = (): boolean => {
-    return window.matchMedia("(any-pointer:coarse)").matches;
+    return window.matchMedia("(pointer:coarse)").matches;
 };
 
 export const useMobile = (): boolean => {
