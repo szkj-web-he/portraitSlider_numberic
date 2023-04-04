@@ -198,7 +198,6 @@ export const initScore = (): Record<string, Record<string, null | number>> => {
             });
         }
     }
-    console.log(JSON.stringify(data));
     return { ...data };
 };
 
